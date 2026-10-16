@@ -1,0 +1,38 @@
+# ashare-quant: 数据 pipeline 定时刷新 → GitHub Pages 报告页
+# 每日 A 股收盘后跑，用 akshare 拉行情 → MLP 打分 → 写 reports/ → Pages
+name: Data Pipeline (Daily A-Share)
+on:
+  schedule:
+    # 北京时间每个交易日 15:30 收盘后
+    - cron: '30 15 * * 1-5'
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install (国内数据源 akshare 优先)
+        run: pip install -r requirements.txt
+      - name: Refresh data + generate report
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime
+          # MVP：占位 pipeline。接真实数据时 import akshare 拉 A 股行情喂 ashare_agent MLP。
+          os.makedirs("reports", exist_ok=True)
+          day = datetime.date.today().isoformat()
+          payload = {"date": day, "signals": [], "note": "MVP 占位；接 akshare 后填充高置信 BUY/SELL"}
+          open(f"reports/{day}.json", "w", encoding="utf-8").write(json.dumps(payload, ensure_ascii=False, indent=2))
+          open("reports/latest.json", "w", encoding="utf-8").write(json.dumps(payload, ensure_ascii=False, indent=2))
+          print("report written", day)
+          PY
+      - name: Commit report
+        run: |
+          git config user.name "ashare-bot"; git config user.email "bot@example.com"
+          git add reports/ && (git commit -m "chore(ashare-quant): 每日报告 $(date +%F)" || echo "no change")
+          git push
+      - uses: pages-build@release/1.0.0
+        if: always()
+        with: {path: 'reports/'}
