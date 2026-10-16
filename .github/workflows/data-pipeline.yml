@@ -28,13 +28,3 @@ jobs:
         with:
           page: web
 
-  pages:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Publish reports
-        run: |
-          mkdir -p .github && echo 'ashare-quant' > .github/URL
-      - uses: actions/deploy-pages@v4
-        with:
-          page: web
