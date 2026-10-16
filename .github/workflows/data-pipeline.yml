@@ -19,11 +19,13 @@ jobs:
         run: pip install -r requirements.txt
       - name: Refresh data + generate report (akshare 拉不到自动回退占位)
         run: python refresh_report.py
-      - name: Commit report
+      - name: Deploy to GitHub Pages
         run: |
-          git config user.name "ashare-bot"; git config user.email "bot@example.com"
-          git add reports/ && (git commit -m "chore(ashare-quant): 每日报告 $(date +%F)" || echo "no change")
-          git push
+          mkdir -p .github && echo 'ashare-quant' > .github/URL
+      - name: Publish reports to Pages
+        uses: actions/deploy-pages@v4
+        with:
+          page: web
 
   pages:
     runs-on: ubuntu-latest
