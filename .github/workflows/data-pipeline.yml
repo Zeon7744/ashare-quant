@@ -5,6 +5,9 @@ on:
     - cron: '30 15 * * 1-5'   # 北京时间交易日收盘后
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -21,3 +24,14 @@ jobs:
           git config user.name "ashare-bot"; git config user.email "bot@example.com"
           git add reports/ && (git commit -m "chore(ashare-quant): 每日报告 $(date +%F)" || echo "no change")
           git push
+
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish reports
+        run: |
+          mkdir -p .github && echo 'ashare-quant' > .github/URL
+      - uses: actions/deploy-pages@v4
+        with:
+          page: web
