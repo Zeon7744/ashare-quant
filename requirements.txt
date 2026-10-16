@@ -1,6 +1,6 @@
 # ashare-quant 运行依赖
 # 引擎（ashare_agent.py）基于 Python 标准库，MVP 零第三方依赖。
 # 数据 pipeline 接真实行情时按需引入（国内数据源优先）：
-#   akshare>=1.14      # A股行情/财务，国内首选，免注册
-#   pandas>=2.0
-#   numpy>=1.26
+akshare>=1.14
+pandas>=2.0
+numpy>=1.26
