@@ -5,7 +5,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 @dataclass
 class StockSignal:
@@ -239,6 +239,96 @@ class AShareAgent:
             'trades_executed': len(self.trade_history),
             'win_rate': self._calc_win_rate()
         }
+
+    def _calc_win_rate(self) -> float:
+        if not self.trade_history:
+            return 0.0
+        wins = sum(1 for t in self.trade_history if t.get('profit', 0) > 0)
+        return wins / len(self.trade_history)
+
+    # ---- 数据 pipeline 接入（P0 缺口补齐） ----
+    def analyze_from_pipeline(self, rows: List[dict], stock_code: str,
+                              data: str = 'qfq') -> StockSignal:
+        """
+        从 data_pipeline 产出的 OHLCV rows 自动计算技术指标并生成信号。
+        打通 数据获取 → 特征 → 信号 链路（此前 agent 需手动喂 price/指标）。
+
+        Args:
+            rows: 归一化 OHLCV（{date, open, high, low, close, volume}），按日期升序
+            stock_code: 标的代码
+        """
+        close = [r.get('close') for r in rows if r.get('close') is not None]
+        vol = [r.get('volume') for r in rows if r.get('volume') is not None]
+        if len(close) < 5:
+            return StockSignal(stock_code, 'HOLD', 0.0, float(close[-1]) if close else 0.0,
+                               time.time(), 'insufficient history')
+        price = float(close[-1])
+        m5 = (close[-1] - close[-5]) / close[-5] if len(close) >= 5 else 0.0
+        m20 = (close[-1] - close[-20]) / close[-20] if len(close) >= 20 else m5
+        v20 = _stdev(vol[-20:]) / _mean(vol[-20:]) if len(vol) >= 20 else 1.0
+        # RSI-14 / 简化波动 / 支阻（滚动 20）
+        rsi14 = _rsi(close)
+        vol20 = _ann_vol(close)
+        sup, res = _support_resistance(close)
+        return self.analyze(
+            stock_code, price, m5, m20, v20, rsi14, 0.0, vol20, sup, res,
+        )
+
+    def load_ohlcv(self, symbol: str, source: str = 'eastmoney',
+                   start_date: str = '', end_date: str = '',
+                   adjust: str = 'qfq', cache_dir: Optional[str] = None) -> dict:
+        """拉取 A 股日线 OHLCV（多源 + 缓存水位线增量 + 复权一致性 QC）。"""
+        from data_pipeline import fetch_daily_ohlcv
+        res = fetch_daily_ohlcv(symbol, source=source, start_date=start_date,
+                                 end_date=end_date, adjust=adjust, cache_dir=cache_dir)
+        return {
+            'rows': res.rows,
+            'source': res.source,
+            'is_incr': res.is_incr,
+            'qc': res.qc.to_dict(),
+        }
+
+
+def _mean(xs: List[float]) -> float:
+    return sum(xs) / len(xs) if xs else 0.0
+
+
+def _stdev(xs: List[float]) -> float:
+    if len(xs) < 2:
+        return 0.0
+    m = _mean(xs)
+    return (sum((x - m) ** 2 for x in xs) / len(xs)) ** 0.5
+
+
+def _rsi(closes: List[float], period: int = 14) -> float:
+    if len(closes) < period + 1:
+        return 50.0
+    gains = losses = 0.0
+    for i in range(len(closes) - period, len(closes)):
+        d = closes[i] - closes[i - 1]
+        if d >= 0:
+            gains += d
+        else:
+            losses += -d
+    if gains + losses == 0:
+        return 50.0
+    rs = (gains / period) / max(losses / period, 1e-9)
+    return 100.0 - 100.0 / (1.0 + rs)
+
+
+def _ann_vol(closes: List[float], bars_per_year: float = 252.0) -> float:
+    if len(closes) < 3:
+        return 0.0
+    rets = [(closes[i] - closes[i - 1]) / closes[i - 1]
+            for i in range(1, len(closes)) if closes[i - 1] > 0]
+    return _stdev(rets) * (bars_per_year ** 0.5)
+
+
+def _support_resistance(closes: List[float], window: int = 20) -> Tuple[float, float]:
+    seg = closes[-window:]
+    if not seg:
+        return 0.0, 0.0
+    return float(min(seg)), float(max(seg))
     
     def _calc_win_rate(self) -> float:
         if not self.trade_history:

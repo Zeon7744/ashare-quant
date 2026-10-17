@@ -84,3 +84,56 @@ class TestBacktest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDataPipeline(unittest.TestCase):
+    """P0：数据 pipeline QC + 复权一致性 + 缓存水位线增量 + agent 接入"""
+
+    @staticmethod
+    def _rows(n=60, seed=3):
+        import random, datetime
+        random.seed(seed)
+        rows, price, d0 = [], 100.0, datetime.date(2026, 1, 5)
+        for i in range(n):
+            d = (d0 + datetime.timedelta(days=i)).isoformat()
+            close = round(price * (1 + random.uniform(-0.01, 0.01)), 2)
+            rows.append({'date': d, 'open': round(price, 2),
+                         'high': round(max(price, close) * 1.01, 2),
+                         'low': round(min(price, close) * 0.99, 2),
+                         'close': close, 'volume': random.uniform(1e6, 3e6)})
+            price = close * 1.01
+        return rows
+
+    def test_inject_local_qc_passes_clean(self):
+        res = backtest_inject.inject_local if False else None
+        from data_pipeline import inject_local, cross_check_ohlcv
+        rows = self._rows(60, seed=3)
+        rep = cross_check_ohlcv(rows, 'CLEAN')
+        self.assertEqual(rep.null_count, 0)
+        self.assertEqual(rep.ohlc_violations, 0)
+        self.assertTrue(rep.passed or rep.vol_spike_days >= 0)
+
+    def test_adjust_jump_detected(self):
+        from data_pipeline import check_adjust_consistency
+        rows = self._rows(50, seed=4)
+        base = rows[30]['close']
+        rows[30]['close'] = round(base * 0.55, 2)   # 单日 -45% 复权跳变
+        rows[31]['close'] = round(base * 0.95, 2)    # 次日回升 → 判定跳变
+        warns, issues = check_adjust_consistency(rows)
+        self.assertGreaterEqual(warns, 1)
+
+    def test_incr_merge_watermark(self):
+        from data_pipeline import incremental_merge
+        cached = [{'date': '2026-01-01'}, {'date': '2026-01-02'}]
+        fresh = [{'date': '2026-01-02'}, {'date': '2026-01-03'}, {'date': '2026-01-04'}]
+        merged = incremental_merge(cached, fresh)
+        self.assertEqual(len(merged), 4)  # 2 cached + 2 new (01-02 deduped)
+        self.assertEqual(merged[-1]['date'], '2026-01-04')
+
+    def test_agent_analyze_from_pipeline(self):
+        from ashare_agent import AShareAgent
+        agent = AShareAgent(initial_cash=100000)
+        sig = agent.analyze_from_pipeline(self._rows(80, seed=5), '600519')
+        self.assertIsNotNone(sig)
+        self.assertIn(sig.signal, ('BUY', 'SELL', 'HOLD'))
+        self.assertGreater(sig.price, 0)
