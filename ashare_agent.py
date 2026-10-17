@@ -23,6 +23,8 @@ class Portfolio:
     cash: float
     positions: Dict[str, float]
     total_value: float
+    # 完善：累计已实现盈亏（卖出现金 - 买入成本），供 report/win_rate 使用
+    realized_pnl: float = 0.0
     # 修复：_last_prices 此前无定义，仅在 agent.__init__ 里 monkey-patch 注入；
     # 直接构造 Portfolio 调 add_position/remove_position 会 AttributeError。
     # 现作为 dataclass 字段，default_factory 给独立实例兜底。
@@ -38,8 +40,10 @@ class Portfolio:
             return False
         self.cash -= cost
         self.positions[stock_code] = self.positions.get(stock_code, 0) + shares
+        self._last_prices[stock_code] = price  # 记最新价
         self.total_value = self.cash + sum(
             self.positions.get(s, 0) * p for s, p in self._last_prices.items()
+            if s in self.positions
         )
         return True
     
@@ -47,12 +51,17 @@ class Portfolio:
         current = self.positions.get(stock_code, 0)
         if shares > current:
             return False
+        sell_cost = shares * self._last_prices.get(stock_code, price)
+        realized = shares * price - sell_cost
+        self.realized_pnl += realized
         self.cash += shares * price
         self.positions[stock_code] = current - shares
         if self.positions[stock_code] == 0:
             del self.positions[stock_code]
+            self._last_prices.pop(stock_code, None)
         self.total_value = self.cash + sum(
             self.positions.get(s, 0) * p for s, p in self._last_prices.items()
+            if s in self.positions
         )
         return True
 
@@ -197,27 +206,35 @@ class AShareAgent:
                 trade['executed'] = True
                 trade['shares'] = shares
                 trade['cost'] = shares * signal.price
+                trade['profit'] = 0.0  # 买入后待卖出现金才计入
                 self.trade_history.append(trade)
         elif signal.signal == 'SELL' and signal.stock_code in self.portfolio.positions:
             shares = self.portfolio.positions[signal.stock_code]
+            base_price = self._last_prices.get(signal.stock_code, signal.price)
             if self.portfolio.remove_position(signal.stock_code, shares, signal.price):
                 trade['executed'] = True
                 trade['shares'] = shares
                 trade['cost'] = shares * signal.price
+                trade['profit'] = shares * (signal.price - base_price)
                 self.trade_history.append(trade)
         
         return trade
     
     def report(self) -> dict:
         """Generate portfolio report."""
-        total = self.portfolio.cash + sum(
-            s * p for s, p in self._last_prices.items()
-            if p in self._last_prices
+        # 完善：持仓估值 = Σ(股数 × 最新价)；旧版把 _last_prices 当成 (shares, price) 对
+        # 且 `if p in self._last_prices` 误把 price 当 key，导致 total_value 计算错误。
+        holdings_value = sum(
+            self.portfolio.positions.get(code, 0) * price
+            for code, price in self._last_prices.items()
+            if code in self.portfolio.positions
         )
+        total = self.portfolio.cash + holdings_value
         return {
             'cash': self.portfolio.cash,
-            'positions': self.portfolio.positions,
+            'positions': dict(self.portfolio.positions),
             'total_value': total,
+            'realized_pnl': self.portfolio.realized_pnl,
             'signals_generated': len(self.signals),
             'trades_executed': len(self.trade_history),
             'win_rate': self._calc_win_rate()
