@@ -82,3 +82,15 @@ MIT License
 **开发者**: Zeon7744  
 **最后更新**: 2026-09-25  
 **GitHub**: https://github.com/Zeon7744/ashare-quant
+
+---
+
+## 🚀 免费 → Pro → 企业（变现入口）
+
+免费=每日高置信信号（Gitee 公开）；Pro=实时信号+组合管理；企业=私有部署
+
+- **免费**：立即 [安装/克隆] 使用，命中配额即可升级。
+- **Pro**：[Gitee Pro 订阅](https://gitee.com/Zeon7744) 解锁高级能力。
+- **企业**：私有部署 / 定制需求 → 见 `pricing.md`，或联系商务（GitHub Issues / Gitee）。
+
+> 详细定价与 SKU 见 [pricing.md](pricing.md) ｜ 支持项目见 [FUNDING.yml](FUNDING.yml)
