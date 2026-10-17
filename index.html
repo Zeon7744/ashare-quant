@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A股量化报告 · ashare-quant</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background:#0d1117; color:#e6edf3; margin:0; padding:0; }
+  .wrap { max-width:860px; margin:0 auto; padding:48px 24px; }
+  h1 { font-size:28px; margin-bottom:8px; }
+  .sub { color:#8b949e; margin-bottom:32px; }
+  .card { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:24px; margin-bottom:20px; }
+  .tag { display:inline-block; font-size:12px; padding:3px 10px; border-radius:12px; background:#1f6feb; color:#fff; margin-bottom:12px; }
+  .tag.pro { background:#a371f4; }
+  ul { padding-left:20px; line-height:1.9; color:#c9d1d9; }
+  .free b { color:#58a6ff; }
+  .cta { display:inline-block; margin-top:16px; padding:10px 22px; background:#238636; color:#fff; border-radius:8px; text-decoration:none; font-size:14px; }
+  .cta.pro { background:#a371f4; }
+  .note { font-size:13px; color:#8b949e; margin-top:8px; }
+  .status { display:flex; gap:8px; align-items:center; font-size:13px; color:#8b949e; margin-bottom:20px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:#d29922; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="status"><span class="dot"></span> 数据源 akshare · 每日更新 · 当前展示为占位数据</div>
+  <h1>A股量化报告</h1>
+  <div class="sub">每日自动扫描 A 股，输出高置信度信号、行业热度与风险预警。</div>
+
+  <div class="card free">
+    <span class="tag">免费</span>
+    <ul>
+      <li>每日 <b>3 条</b> 高置信度 A 股信号</li>
+      <li>行业热度速览</li>
+      <li>风险提示与仓位建议</li>
+    </ul>
+    <a class="cta" href="#">查看今日免费信号</a>
+  </div>
+
+  <div class="card">
+    <span class="tag pro">Pro</span>
+    <ul>
+      <li>全量信号（数百只个股）</li>
+      <li>行业对比模块 + 资金流向</li>
+      <li>订阅推送（邮件/微信）</li>
+      <li>历史回测与策略复盘</li>
+    </ul>
+    <a class="cta pro" href="#">解锁 Pro 全量信号</a>
+    <div class="note">Pro 订阅 · 月度计费 · 支持 7 天无理由退款</div>
+  </div>
+
+  <div class="note">数据仅供研究参考，不构成投资建议。 ashare-quant · MIT License</div>
+</div>
+</body>
+</html>
