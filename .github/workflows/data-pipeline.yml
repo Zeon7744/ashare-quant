@@ -20,11 +20,16 @@ jobs:
         run: pip install -r requirements.txt
       - name: Refresh data + generate report (akshare 拉不到自动回退占位)
         run: python refresh_report.py
-      - name: Deploy to GitHub Pages
+      - name: Push reports to gh-pages
         run: |
-          mkdir -p .github && echo 'ashare-quant' > .github/URL
-      - name: Publish reports to Pages
-        uses: actions/deploy-pages@v4
-        with:
-          page: web
-
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions@github.com"
+          # 把 reports/ 目录推到 gh-pages 分支（GitHub Pages 源）
+          git checkout -B gh-pages
+          mkdir -p reports
+          cp ../refresh_report.py reports/ 2>/dev/null || true
+          git add reports/
+          git commit -m "pages: auto-update report data ($(date +%Y-%m-%d))" --allow-empty || git commit -m "pages: no changes" --allow-empty
+          git push origin gh-pages
+        env:
+          DATE: ${{ github.event.inputs.date || '' }}
