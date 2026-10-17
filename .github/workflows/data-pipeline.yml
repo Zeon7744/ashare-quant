@@ -7,29 +7,28 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with: {python-version: '3.11'}
-      - name: Install (akshare 国内数据源优先)
-        run: pip install -r requirements.txt
-      - name: Refresh data + generate report (akshare 拉不到自动回退占位)
+      - name: Install (akshare 国内数据源优先，拉不到自动回退占位)
+        run: pip install -r requirements.txt || pip install pandas numpy
+      - name: Refresh data + generate report
         run: python refresh_report.py
       - name: Push reports to gh-pages
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions@github.com"
-          # 把 reports/ 目录推到 gh-pages 分支（GitHub Pages 源）
-          git checkout -B gh-pages
-          mkdir -p reports
-          cp ../refresh_report.py reports/ 2>/dev/null || true
-          git add reports/
-          git commit -m "pages: auto-update report data ($(date +%Y-%m-%d))" --allow-empty || git commit -m "pages: no changes" --allow-empty
+          # 切到 gh-pages，把 main 刚生成的 reports 推过去（保留 gh-pages 上已有 index.html 兜底）
+          git checkout -B gh-pages origin/gh-pages 2>/dev/null || git checkout -B gh-pages
+          git checkout main -- reports 2>/dev/null || true
+          git add -A
+          git commit -m "pages: auto-update report ($(date +%Y-%m-%d))" --allow-empty
           git push origin gh-pages
-        env:
-          DATE: ${{ github.event.inputs.date || '' }}
+        continue-on-error: false
