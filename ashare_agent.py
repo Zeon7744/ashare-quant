@@ -4,7 +4,7 @@ ashare-quant: A-Share Quantitative Agent with MLP Prediction
 import json
 import time
 import uuid
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional
 
 @dataclass
@@ -23,6 +23,10 @@ class Portfolio:
     cash: float
     positions: Dict[str, float]
     total_value: float
+    # 修复：_last_prices 此前无定义，仅在 agent.__init__ 里 monkey-patch 注入；
+    # 直接构造 Portfolio 调 add_position/remove_position 会 AttributeError。
+    # 现作为 dataclass 字段，default_factory 给独立实例兜底。
+    _last_prices: Dict[str, float] = field(default_factory=dict)
     
     @property
     def position_count(self):
