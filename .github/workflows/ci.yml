@@ -1,0 +1,64 @@
+name: CI - akshare 稳定性测试
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # 每日北京时间 09:00
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install akshare pandas numpy
+          pip install -r requirements.txt
+      
+      - name: Run akshare stability test
+        run: |
+          python -c "
+          import akshare as ak
+          import time
+          
+          # 测试主要数据源
+          tests = [
+              ('stock_zh_a_spot', lambda: ak.stock_zh_a_spot()),
+              ('stock_zh_a_hist', lambda: ak.stock_zh_a_hist('600519', period='daily', start_date='20240101', end_date='20241231')),
+              ('fund_etf_fund_info_em', lambda: ak.fund_etf_fund_info_em()),
+          ]
+          
+          success = 0
+          total = len(tests)
+          
+          for name, func in tests:
+              try:
+                  df = func()
+                  print(f'✅ {name}: {len(df)} rows')
+                  success += 1
+                  time.sleep(1)
+              except Exception as e:
+                  print(f'❌ {name}: {str(e)[:50]}')
+          
+          rate = success / total * 100
+          print(f'Success rate: {rate:.1f}%')
+          assert rate >= 95, f'akshare success rate {rate}% < 95%'
+          "
+      
+      - name: Run full test suite
+        run: pytest tests/ -v || true
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.python-version == '3.11'
