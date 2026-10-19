@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 reports/*.json
 !reports/INDEX.md
+
+# 敏感配置
+.env

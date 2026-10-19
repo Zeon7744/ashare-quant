@@ -1,0 +1,6 @@
+# This file is auto-generated from requirements.txt
+# Do not edit manually
+
+akshare==1.14
+pandas==2.0
+numpy==1.26
