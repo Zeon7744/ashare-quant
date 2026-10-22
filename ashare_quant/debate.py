@@ -35,6 +35,22 @@ import sys
 from typing import Any, Dict, List, Optional
 
 # ---------------------------------------------------------------------------
+# Pro 门控（可选依赖，不影响核心逻辑）
+# ---------------------------------------------------------------------------
+
+def _check_pro_gate() -> None:
+    """检查 Free 套餐辩论次数限制；超限打印升级提示并退出。"""
+    try:
+        from ashare_quant.pro_gates import check_gates
+        plan = os.environ.get("ASHARE_PLAN", "free")
+        allowed, message = check_gates(plan, "debate")
+        if not allowed:
+            print(message, file=sys.stderr)
+            sys.exit(0)  # 优雅退出，非错误
+    except ImportError:
+        pass  # pro_gates 未安装时跳过检查
+
+# ---------------------------------------------------------------------------
 # Thresholds (match regime.py thresholds, kept inline for stand-alone clarity)
 # ---------------------------------------------------------------------------
 
@@ -471,6 +487,9 @@ def main() -> int:
     ap.add_argument("--json", action="store_true",
                     help="Output as JSON instead of formatted text")
     args = ap.parse_args()
+
+    # Pro 门控：Free 超限则提示升级并退出
+    _check_pro_gate()
 
     factors = None
     if args.csv:

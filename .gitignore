@@ -5,3 +5,5 @@ reports/*.json
 
 # 敏感配置
 .env
+.pro_state/
+__pycache__/

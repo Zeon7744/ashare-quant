@@ -1,1 +1,155 @@
-<!DOCTYPE html><html lang='zh-CN'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>A股量化报告</title><style>body{font-family:-apple-system,sans-serif;background:#0d1117;color:#e6edf3;max-width:800px;margin:0 auto;padding:40px 20px}.badge{background:#1f6feb;color:#fff;padding:2px 10px;border-radius:10px;font-size:12px}.badge.pro{background:#a371f4}h1{font-size:26px}table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid #30363d;padding:8px;text-align:left}tr:nth-child(even){background:#161b22}</style></head><body><h1>A股量化报告</h1><p><span class='badge'>免费 3 条/天</span> <span class='badge pro'>Pro 解锁全量 0 条</span> 数据源：数据源不可用，当前为占位 · 2026-10-17</p><table><tr><th>代码</th><th>名称</th><th>信号</th><th>置信度</th></tr><tr><td>600519</td><td>贵州茅台</td><td>BUY</td><td>0.85</td></tr><tr><td>000858</td><td>五粮液</td><td>SELL</td><td>0.7</td></tr></table><p style='margin-top:24px'><a href='#' style='color:#58a6ff'>解锁 Pro 全量信号 →</a></p><p style='color:#8b949e;font-size:13px'>数据仅供研究参考，不构成投资建议。 ashare-quant · MIT License</p></body></html>
+<!DOCTYPE html><html lang='zh-CN'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>A股量化报告 · 开源 AI 投研 Agent</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;line-height:1.6}
+.container{max-width:900px;margin:0 auto;padding:40px 20px}
+
+/* Hero */
+.hero{text-align:center;padding:60px 20px 40px;border-bottom:1px solid #21262d}
+.hero h1{font-size:32px;background:linear-gradient(135deg,#58a6ff,#a371f4,#f78166);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+.hero .subtitle{font-size:18px;color:#8b949e;margin-bottom:8px}
+.hero .badges{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.badge{display:inline-block;background:#1f6feb;color:#fff;padding:4px 14px;border-radius:12px;font-size:13px;font-weight:500}
+.badge.pro{background:#a371f4}
+.badge.star{background:#238636}
+.badge.free{background:#30363d;border:1px solid #484f58}
+
+/* Section */
+.section{padding:40px 0;border-bottom:1px solid #21262d}
+.section h2{font-size:22px;margin-bottom:16px;color:#e6edf3}
+.section p{color:#8b949e;font-size:15px;margin-bottom:12px}
+
+/* Demo placeholder */
+.demo-box{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:24px;text-align:center;margin:20px 0}
+.demo-box .terminal{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:16px;text-align:left;font-family:'Courier New',monospace;font-size:13px;color:#7ee787;margin-top:16px;overflow-x:auto;white-space:pre}
+.demo-box .cmd{color:#58a6ff}
+.demo-box .label{color:#8b949e;font-size:12px;text-transform:uppercase;letter-spacing:1px}
+
+/* Pro wall */
+.pro-wall{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px}
+.pro-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;transition:border-color .2s}
+.pro-card:hover{border-color:#a371f7}
+.pro-card h3{font-size:16px;margin-bottom:8px;color:#e6edf3}
+.pro-card .plan-tag{font-size:11px;color:#a371f7;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.pro-card p{font-size:14px;color:#8b949e;margin-bottom:12px}
+.pro-card .price{font-size:20px;font-weight:700;color:#58a6ff}
+.pro-card .price span{font-size:13px;color:#8b949e;font-weight:400}
+
+/* Table */
+table{width:100%;border-collapse:collapse;margin:12px 0}
+th,td{border:1px solid #30363d;padding:8px 12px;text-align:left}
+tr:nth-child(even){background:#161b22}
+th{background:#21262d}
+
+/* CTA */
+.cta{text-align:center;padding:40px 0}
+.cta a{display:inline-block;background:linear-gradient(135deg,#1f6feb,#a371f7);color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px;transition:opacity .2s}
+.cta a:hover{opacity:.9}
+
+/* Footer */
+.footer{color:#484f58;font-size:13px;text-align:center;padding:24px 0}
+</style></head><body>
+
+<!-- Hero -->
+<div class='hero'>
+  <h1>开源 AI 投研 Agent</h1>
+  <p class='subtitle'>多空辩论 · 对标 FinRL 16.3k Star</p>
+  <p style='color:#8b949e;font-size:15px;margin-top:8px'>基于量化因子的自动多空辩论框架，纯 Python 零依赖可运行</p>
+  <div class='badges'>
+    <span class='badge star'>⭐ Open Source</span>
+    <span class='badge free'>免费 3 次/天</span>
+    <span class='badge pro'>Pro 解锁全量</span>
+  </div>
+</div>
+
+<div class='container'>
+
+<!-- 多空辩论演示 -->
+<div class='section'>
+  <h2>🐂🐻 多空辩论演示</h2>
+  <p>输入股票代码，AI 自动生成看多/看空论点，结合市场状态给出操作建议。</p>
+
+  <!-- GIF/SVG 占位符 -->
+  <div class='demo-box'>
+    <div class='label'>▸ 运行示例 · python -m ashare_quant.debate --stock 600519</div>
+    <div class='terminal'><span class='cmd'>$ python -m ashare_quant.debate --stock 600519</span>
+================================================================
+  多空辩论  |  600519  |  regime=bull  |  action=buy_or_add  |  confidence=70%
+================================================================
+
+  🐂  看多理由（4 条）
+    1. [趋势] 价格高于 SMA20 约 4.2%
+         证据: close=1720.00, sma20=1650.00
+    2. [动量] RSI 62.0，处于强势区间（55–70）
+         证据: rsi_14=62.0
+    3. [中期动量] 120日动量 +8.2%（>3.0%，中期趋势走强）
+         证据: mom_120=+8.20
+
+  🐻  看空理由（0 条）
+
+  结论: 600519：多方 4 条 / 空方 0 条；判定 = buy_or_add（70% 置信）
+
+<!-- TODO: 替换为实际 GIF 录屏 -->
+<svg width='100%' height='4' style='margin-top:12px'><rect width='100%' height='4' rx='2' fill='#238636'/></svg></div>
+    <p style='color:#484f58;font-size:12px;margin-top:8px'>📹 GIF 占位符 — 替换为终端录屏 demo.gif</p>
+  </div>
+</div>
+
+<!-- 数据表格 -->
+<div class='section'>
+  <h2>📊 最新信号</h2>
+  <p>数据源：数据源不可用，当前为占位 · 2026-10-17</p>
+  <table>
+    <tr><th>代码</th><th>名称</th><th>信号</th><th>置信度</th></tr>
+    <tr><td>600519</td><td>贵州茅台</td><td>BUY</td><td>0.85</td></tr>
+    <tr><td>000858</td><td>五粮液</td><td>SELL</td><td>0.70</td></tr>
+  </table>
+</div>
+
+<!-- Pro 功能墙 -->
+<div class='section'>
+  <h2>🚀 Pro 功能</h2>
+  <p>免费版每日 3 次辩论，升级解锁全部能力。</p>
+  <div class='pro-wall'>
+    <div class='pro-card'>
+      <div class='plan-tag'>Pro · ¥29/月</div>
+      <h3>📈 多标的组合辩论</h3>
+      <p>同时分析多个股票，自动对比多空强度排名</p>
+    </div>
+    <div class='pro-card'>
+      <div class='plan-tag'>Pro · ¥29/月</div>
+      <h3>⚡ 实时信号推送</h3>
+      <p>盘中实时监控，多空信号变化即时通知</p>
+    </div>
+    <div class='pro-card'>
+      <div class='plan-tag'>Pro · ¥29/月</div>
+      <h3>🔄 无限辩论次数</h3>
+      <p>不限每日辩论次数，随时随地深度研究</p>
+    </div>
+    <div class='pro-card'>
+      <div class='plan-tag'>Studio · ¥99/月</div>
+      <h3>📚 回测策略库</h3>
+      <p>内置 20+ 经典量化策略回测模板，一键验证</p>
+    </div>
+    <div class='pro-card'>
+      <div class='plan-tag'>Studio · ¥99/月</div>
+      <h3>🏛️ 机构级信号</h3>
+      <p>资金流向、大单追踪、机构持仓深度分析</p>
+    </div>
+    <div class='pro-card'>
+      <div class='plan-tag'>Studio · ¥99/月</div>
+      <h3>🎯 5 标的组合</h3>
+      <p>最多 5 只股票同时辩论，机构级组合分析</p>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class='cta'>
+  <a href='https://github.com/Zeon7744/ashare-quant'>⭐ Star on GitHub</a>
+  <p style='margin-top:12px'><a href='pricing.md' style='color:#58a6ff'>查看定价详情 →</a></p>
+</div>
+
+</div>
+
+<p class='footer'>数据仅供研究参考，不构成投资建议。 ashare-quant · MIT License</p>
+</body></html>
