@@ -6,6 +6,7 @@ import time
 import uuid
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Tuple
+import billing
 
 @dataclass
 class StockSignal:
@@ -362,3 +363,8 @@ if __name__ == '__main__':
     print(f"Cash: {report['cash']}")
     print(f"Positions: {report['positions']}")
     print(f"Signals: {report['signals_generated']}, Trades: {report['trades_executed']}")
+
+
+def gate_access(plan="free"):
+    """有偿授权门控：免费限次，PRO 解锁高级因子/回测"""
+    return billing.check_access(plan)
