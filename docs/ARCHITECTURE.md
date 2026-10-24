@@ -8,7 +8,7 @@ ashare-quant/
 │   ├── backtest.py      # 回测引擎
 │   ├── data/            # 数据获取
 │   └── pro_gates.py    # PRO 门控（PRO_GATES/check_gates）
-├── billing.py           # 收款层：NoopGateway + AfdianGateway + PAYWALL_RULES + check_access
+├── billing.py           # 收款层：NoopGateway + MbdGateway + PAYWALL_RULES + check_access
 ├── backtest.py          # 顶层回测入口
 └── docs/
 ```

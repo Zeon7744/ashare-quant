@@ -50,7 +50,7 @@ bash smoke_test.sh
 
 ### 订阅验证流程
 
-1. 用户通过爱发电/虎皮椒/虎皮椒完成支付
+1. 用户通过面包多 Pay/虎皮椒/虎皮椒完成支付
 2. 系统验证支付凭证 → 激活 Pro/Studio 权限
 3. `pro_gates.py` 中 `check_gates(plan, action)` 实时校验
 4. 超限自动降级并提示升级
