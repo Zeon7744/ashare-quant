@@ -7,3 +7,4 @@ reports/*.json
 .env
 .pro_state/
 __pycache__/
+praise_ledger.jsonl
